@@ -12,16 +12,16 @@
 */
 
 // IO pins
-#define SWITCHPIN 4
-#define LEDPIN 5
+const int switchPin=4;
+const int ledPin=5;
 // Pre-defined light levels
-#define LIGHTFULL 255
-#define LIGHTHALF 128
-#define LIGHTOFF 0
+const int lightFull=255;
+const int lightHalf=128;
+const int lightOff=0;
 // Variables in the timing array
-#define TIMINGSIZE 2
-#define DEBOUNCETIMING 0
-#define FADETIMING 1
+const int timingSize=2;
+const int debounceTiming=0;
+const int fadeTiming=1;
 
 int ledState = LOW; // current LED state
 int buttonState; // current (debounced) button state
@@ -41,14 +41,14 @@ const int fadeStepTime = 10; // how long to wait between each fade
 boolean offState = true;
 boolean onState = false;
 
-long timingArray[TIMINGSIZE]; // Holds counts for functions that want to do things periodically
+long timingArray[timingSize]; // Holds counts for functions that want to do things periodically
 
 void setup() {
-  pinMode(SWITCHPIN, INPUT);
-  pinMode(LEDPIN, OUTPUT);
-  buttonState = digitalRead(SWITCHPIN);
+  pinMode(switchPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  buttonState = digitalRead(switchPin);
   // Serial.begin(9600);
-  for (int i=0; i<TIMINGSIZE; i++)
+  for (int i=0; i<timingSize; i++)
     timingArray[i] = 0;
 }
 
@@ -74,18 +74,18 @@ void loop() {
 }
 
 void debounceButton() {
-  int reading = digitalRead(SWITCHPIN);
+  int reading = digitalRead(switchPin);
   long curtime = millis();
   
   // If the switch has changed state
   // at all, reset the debounce timer.
   if (reading != prebounceButtonState) {
-    timingArray[DEBOUNCETIMING] = millis();
+    timingArray[debounceTiming] = millis();
   }
   
   // if the last debounce time was long enough
   // ago, then the current reading is stable.
-  if ((millis() - timingArray[DEBOUNCETIMING]) > debounceDelay) {
+  if ((millis() - timingArray[debounceTiming]) > debounceDelay) {
     buttonState = reading;
   }
   
@@ -93,21 +93,21 @@ void debounceButton() {
 }
 
 void turnOn() {
-  lightDesired = LIGHTFULL;
+  lightDesired = lightFull;
   onState = true;
   offState = false;
 }
 
 void turnOff() {
-  lightDesired = LIGHTOFF;
+  lightDesired = lightOff;
   offState = true;
   onState = false;
 }
 
 void lightFade() {
   long curTime = millis();
-  if (curTime - timingArray[FADETIMING] > fadeStepTime) {
-    timingArray[FADETIMING] = curTime;
+  if (curTime - timingArray[fadeTiming] > fadeStepTime) {
+    timingArray[fadeTiming] = curTime;
     if (lightDesired == lightCurrent) return;
     // Explicitly deal with the case where difference between desired and
     // current is less than the interval, rather than bouncing above and
@@ -124,6 +124,6 @@ void lightFade() {
     }
     // Serial.print("Setting brightness to ");
     // Serial.println(lightCurrent);
-    analogWrite(LEDPIN, lightCurrent);
+    analogWrite(ledPin, lightCurrent);
   }
 }
