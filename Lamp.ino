@@ -12,57 +12,59 @@
 */
 
 // IO pins
-const int switchPin=4;
-const int ledPin=5;
+const int switchPin=4; // The pin the switch is attached to.
+const int ledPin=5; // The pin the LED is attached to.
 // Pre-defined light levels
-const int lightFull=255;
-const int lightHalf=128;
-const int lightOff=0;
+const int lightFull=255; // Maximum brightness.
+const int lightHalf=128; // Mid-range brightness. Tweak to taste.
+const int lightOff=0; // Minimum brightness (off).
 // Variables in the timing array
-const int timingSize=2;
-const int debounceTiming=0;
-const int fadeTiming=1;
+const int timingSize=2; // Overall size of the array.
+const int debounceTiming=0; // Array element for debouncing switchPin input.
+const int fadeTiming=1; // Array element for fading ledPin.
 
-int ledState = LOW; // current LED state
-int buttonState; // current (debounced) button state
-int lastButtonState = LOW; // last (debounced) button state
+// Overall lamp states
+boolean offState = true; // Whether we're off, or turning off.
+boolean onState = false; // Whether we're on, or turning on.
+
+// IO state
+int ledState = LOW; // Current LED state.
+int buttonState; // Current (debounced) button state.
+int lastButtonState = LOW; // Last (debounced) button state.
 
 // Debounce variables
-int prebounceButtonState = LOW; // tracks button state before debouncing
-long debounceDelay = 50;
+int prebounceButtonState = LOW; // Tracks button state before debouncing.
+long debounceDelay = 50; // The debounce time. Input is stable after this.
 
 // Light fading variables
-int lightDesired; // what we'd like to transition to
-int lightCurrent; // what the light level currently is
-const int fadeAmount = 5; // how much to fade per step
-const int fadeStepTime = 10; // how long to wait between each fade
+int lightDesired; // What we'd like to transition to.
+int lightCurrent; // What the light level currently is.
+const int fadeAmount = 5; // How much to fade per step.
+const int fadeStepTime = 10; // How long to wait between each fade.
 
-// lamp states
-boolean offState = true;
-boolean onState = false;
-
-long timingArray[timingSize]; // Holds counts for functions that want to do things periodically
+long timingArray[timingSize]; // All timers store their last-run time here.
 
 void setup() {
   pinMode(switchPin, INPUT);
   pinMode(ledPin, OUTPUT);
   buttonState = digitalRead(switchPin);
   // Serial.begin(9600);
-  for (int i=0; i<timingSize; i++)
+  for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
+  }
 }
 
 void loop() {
-  // update button and light states.
+  // Update button and light states.
   debounceButton();
   lightFade();
 
   if (buttonState != lastButtonState && buttonState == HIGH) {
     if (offState) {
-      Serial.println("Turning on");
+      // Serial.println("Turning on");
       turnOn();
     } else {
-      Serial.println("Turning off");
+      // Serial.println("Turning off");
       turnOff();
     }
   }
