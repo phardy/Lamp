@@ -107,7 +107,7 @@ void turnOff() {
 void lightFade() {
   long curTime = millis();
   if (curTime - timingArray[FADETIMING] > fadeStepTime) {
-    timingArray[1] = curTime;
+    timingArray[FADETIMING] = curTime;
     if (lightDesired == lightCurrent) return;
     // Explicitly deal with the case where difference between desired and
     // current is less than the interval, rather than bouncing above and
