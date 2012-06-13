@@ -125,8 +125,6 @@ void lightFade() {
         lightCurrent = lightCurrent - fadeAmount;
       }
     }
-    // Serial.print("Setting brightness to ");
-    // Serial.println(lightCurrent);
     analogWrite(ledPin, lightCurrent);
   }
 }
