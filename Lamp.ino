@@ -23,9 +23,13 @@ const int timingSize=2; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
 const int fadeTiming=1; // Array element for fading ledPin.
 
-// Overall lamp states
-boolean offState = true; // Whether we're off, or turning off.
-boolean onState = false; // Whether we're on, or turning on.
+// Current lamp state.
+enum states {
+  on, // The lamp is on.
+  off, // The lamp is off.
+  timer // The lamp is on, but will turn off after a timed delay.
+};
+states lampState = off;
 
 // IO state
 int ledState = LOW; // Current LED state.
@@ -60,7 +64,7 @@ void loop() {
   lightFade();
 
   if (buttonState != lastButtonState && buttonState == HIGH) {
-    if (offState) {
+    if (lampState == off) {
       // Serial.println("Turning on");
       turnOn();
     } else {
@@ -97,14 +101,12 @@ void debounceButton() {
 
 void turnOn() {
   lightDesired = lightFull;
-  onState = true;
-  offState = false;
+  lampState = on;
 }
 
 void turnOff() {
   lightDesired = lightOff;
-  offState = true;
-  onState = false;
+  lampState = off;
 }
 
 void lightFade() {
