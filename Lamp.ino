@@ -52,7 +52,6 @@ void setup() {
   pinMode(switchPin, INPUT);
   pinMode(ledPin, OUTPUT);
   buttonState = digitalRead(switchPin);
-  // Serial.begin(9600);
   for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
   }
@@ -65,10 +64,8 @@ void loop() {
 
   if (buttonState != lastButtonState && buttonState == HIGH) {
     if (lampState == off) {
-      // Serial.println("Turning on");
       turnOn();
     } else {
-      // Serial.println("Turning off");
       turnOff();
     }
   }
