@@ -76,18 +76,19 @@ void loop() {
 }
 
 void debounceButton() {
+  long *timer = &timingArray[debounceTiming];
   int reading = digitalRead(switchPin);
   long curtime = millis();
   
   // If the switch has changed state
   // at all, reset the debounce timer.
   if (reading != prebounceButtonState) {
-    timingArray[debounceTiming] = millis();
+    *timer = millis();
   }
   
   // if the last debounce time was long enough
   // ago, then the current reading is stable.
-  if ((millis() - timingArray[debounceTiming]) > debounceDelay) {
+  if ((millis() - *timer) > debounceDelay) {
     buttonState = reading;
   }
   
@@ -107,9 +108,10 @@ void turnOff() {
 }
 
 void lightFade() {
+  long *timer = &timingArray[fadeTiming];
   long curTime = millis();
-  if (curTime - timingArray[fadeTiming] > fadeStepTime) {
-    timingArray[fadeTiming] = curTime;
+  if (curTime - *timer > fadeStepTime) {
+    *timer = curTime;
     if (lightDesired == lightCurrent) return;
     // Explicitly deal with the case where difference between desired and
     // current is less than the interval, rather than bouncing above and
