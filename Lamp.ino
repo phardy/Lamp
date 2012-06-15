@@ -1,12 +1,20 @@
 /*
   Control an LED lamp.
+  Note that this is Leonardo-specific, but should work on other
+  Arduino-compatible boards with a second serial (Serial1) connection
+  with minor modifications.
 
-  Works with a 1W LED driver switched through pin 5,
-  and a momentary button attached to pin 4.
+  Wiring:
+  * LED connected to pin 5. (I'm using a 1W LED driver; check references.)
+  * Momentary button attached to pin 4.
+  * Bluetooth module: RX on pin 0, TX on pin 1. (This is mapped to
+    Serial1 on Leonardo boards)
   
   References:
   LED driver: http://www.instructables.com/id/Circuits-for-using-High-Power-LED-s/
   Button wiring: http://www.arduino.cc/en/Tutorial/Button
+  Compatible bluetooth module: http://www.sparkfun.com/products/10393
+  Compatible Android control app: https://play.google.com/store/apps/details?id=com.app.control
   
   Peter Hardy <peter@hardy.dropbear.id.au>
 */
@@ -53,6 +61,7 @@ void setup() {
   pinMode(switchPin, INPUT);
   pinMode(ledPin, OUTPUT);
   buttonState = digitalRead(switchPin);
+  // Populate the timing array.
   for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
   }
@@ -61,12 +70,11 @@ void setup() {
 }
 
 void loop() {
-  // Update button and light states.
-  debounceButton();
-  lightFade();
+  debounceButton(); // Debounce button input.
+  lightFade();  // Update light state.
 
-  readButton();
-  readSerial();
+  readButton(); // Check for debounced button state changes.
+  readSerial(); // Check for commands from bluetooth.
 }
 
 void readButton() {
