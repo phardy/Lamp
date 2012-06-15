@@ -66,6 +66,7 @@ void setup() {
     timingArray[i] = 0;
   }
 
+  // Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
 }
 
@@ -96,10 +97,15 @@ void readSerial() {
     serialByte = Serial1.read();
     switch (serialByte) {
     case 'A':
+      // Serial.println("BT turn on"); // Debugging.
       turnOn();
       break;
     case 'a':
+      // Serial.println("BT turn off"); // Debugging.
       turnOff();
+      break;
+    default:
+      // Serial.println("BT unknown received"); // Debugging.
       break;
     }
   }
@@ -126,11 +132,13 @@ void debounceButton() {
 }
 
 void turnOn() {
+  // Serial.println("Turning lamp on"); // Debugging.
   lightDesired = lightFull;
   lampState = on;
 }
 
 void turnOff() {
+  // Serial.println("Turning lamp off"); // Debugging.
   lightDesired = lightOff;
   lampState = off;
 }
