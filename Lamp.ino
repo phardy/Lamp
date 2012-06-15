@@ -62,17 +62,21 @@ void loop() {
   debounceButton();
   lightFade();
 
+  readButton();
+  
+  // Reset lastButtonState if anything's changed.
+  if (buttonState != lastButtonState) {
+    lastButtonState = buttonState;
+  }
+}
+
+void readButton() {
   if (buttonState != lastButtonState && buttonState == HIGH) {
     if (lampState == off) {
       turnOn();
     } else {
       turnOff();
     }
-  }
-  
-  // Reset lastButtonState if anything's changed.
-  if (buttonState != lastButtonState) {
-    lastButtonState = buttonState;
   }
 }
 
