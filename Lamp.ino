@@ -1,6 +1,6 @@
 /*
   Control an LED lamp.
-  
+
   Works with a 1W LED driver switched through pin 5,
   and a momentary button attached to pin 4.
   
@@ -35,7 +35,7 @@ states lampState = off;
 int ledState = LOW; // Current LED state.
 int buttonState; // Current (debounced) button state.
 int lastButtonState = LOW; // Last (debounced) button state.
-int bluetoothByte; // Bytes read from the bluetooth serial device.
+int serialByte; // Bytes read from the bluetooth serial device.
 
 // Debounce variables
 int prebounceButtonState = LOW; // Tracks button state before debouncing.
@@ -56,6 +56,8 @@ void setup() {
   for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
   }
+
+  Serial1.begin(115200); // Leonardo uses Serial1.
 }
 
 void loop() {
@@ -64,11 +66,7 @@ void loop() {
   lightFade();
 
   readButton();
-  
-  // Reset lastButtonState if anything's changed.
-  if (buttonState != lastButtonState) {
-    lastButtonState = buttonState;
-  }
+  readSerial();
 }
 
 void readButton() {
@@ -77,6 +75,24 @@ void readButton() {
       turnOn();
     } else {
       turnOff();
+    }
+  }
+  // Reset lastButtonState if anything's changed.
+  if (buttonState != lastButtonState) {
+    lastButtonState = buttonState;
+  }
+}
+
+void readSerial() {
+  if (Serial1.available() > 0) {
+    serialByte = Serial1.read();
+    switch (serialByte) {
+    case 'A':
+      turnOn();
+      break;
+    case 'a':
+      turnOff();
+      break;
     }
   }
 }
