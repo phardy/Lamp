@@ -40,7 +40,6 @@ enum states {
 states lampState = off;
 
 // IO state
-int ledState = LOW; // Current LED state.
 int buttonState; // Current (debounced) button state.
 int lastButtonState = LOW; // Last (debounced) button state.
 int serialByte; // Bytes read from the bluetooth serial device.
