@@ -1,7 +1,9 @@
 """lampcontrol.py
 
-Android code to send control codes to an arduino lamp
-via a Bluetooth serial connection.
+Android SL4A script to send control codes to an
+arduino lamp via a Bluetooth serial connection.
+
+Peter Hardy <peter@hardy.dropbear.id.au>
 """
 
 import android
