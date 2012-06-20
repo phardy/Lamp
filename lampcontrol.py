@@ -36,7 +36,6 @@ if (BTconnect):
 
     if (sendStr):
         droid.bluetoothWrite(LAMP_CMD)
-
     # Not sure if want.
     # droid.bluetoothStop()
 else:
