@@ -24,7 +24,7 @@ const int switchPin=4; // The pin the switch is attached to.
 const int ledPin=5; // The pin the LED is attached to.
 // Pre-defined light levels
 const int lightFull=255; // Maximum brightness.
-const int lightHalf=180; // Mid-range brightness. Tweak to taste.
+const int lightHalf=160; // Mid-range brightness. Tweak to taste.
 const int lightOff=0; // Minimum brightness (off).
 // The timing array holds counters used for timed events.
 const int timingSize=4; // Overall size of the array.
@@ -60,7 +60,7 @@ int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 10; // How long to wait between each fade.
 
 // Blink variables
-const int blinkToggle = 750; // How long to leave light on/off while blinking.
+const int blinkToggle = 600; // How long to leave light on/off while blinking.
 const int blinkTotal = 30000; // How long to blink for before switching to On.
 
 void setup() {
