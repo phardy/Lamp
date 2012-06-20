@@ -26,15 +26,19 @@ const int ledPin=5; // The pin the LED is attached to.
 const int lightFull=255; // Maximum brightness.
 const int lightHalf=128; // Mid-range brightness. Tweak to taste.
 const int lightOff=0; // Minimum brightness (off).
-// Variables in the timing array
-const int timingSize=2; // Overall size of the array.
+// The timing array holds counters used for timed events.
+const int timingSize=4; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
 const int fadeTiming=1; // Array element for fading ledPin.
+const int blinkDelay=2; // Array element for switching between on and off blinks.
+const int blinkTiming=3; // Array element to control how long to blink for.
+long timingArray[timingSize];
 
 // Current lamp state.
 enum states {
   on, // The lamp is on.
   off, // The lamp is off.
+  blink, // The lamp will blink on and off.
   timer // The lamp is on, but will turn off after a timed delay.
 };
 states lampState = off;
@@ -51,10 +55,13 @@ long debounceDelay = 50; // The debounce time. Input is stable after this.
 // Light fading variables
 int lightDesired; // What we'd like to transition to.
 int lightCurrent; // What the light level currently is.
-const int fadeAmount = 5; // How much to fade per step.
+const int normalFade = 5; // Default amount to fade per step.
+int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 10; // How long to wait between each fade.
 
-long timingArray[timingSize]; // All timers store their last-run time here.
+// Blink variables
+const int blinkToggle = 3000; // How long to leave light on/off while blinking.
+const int blinkTotal = 30000; // How long to blink for before switching to On.
 
 void setup() {
   pinMode(switchPin, INPUT);
@@ -65,14 +72,16 @@ void setup() {
     timingArray[i] = 0;
   }
 
-  // Serial.begin(9600); // Debugging.
+  Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
 }
 
 void loop() {
   debounceButton(); // Debounce button input.
   lightFade();  // Update light state.
-
+  if (lampState == blink) {
+    blinkLight(); // Update blinking.
+  }
   readButton(); // Check for debounced button state changes.
   readSerial(); // Check for commands from bluetooth.
 }
@@ -103,8 +112,13 @@ void readSerial() {
       // Serial.println("BT turn off"); // Debugging.
       turnOff();
       break;
+    case 'B':
+      Serial.println("BT blink mode"); // Debugging.
+      blinkOn();
+      break;
     default:
-      // Serial.println("BT unknown received"); // Debugging.
+      Serial.print("BT unknown received: "); // Debugging.
+      Serial.println(serialByte);
       break;
     }
   }
@@ -131,15 +145,22 @@ void debounceButton() {
 }
 
 void turnOn() {
-  // Serial.println("Turning lamp on"); // Debugging.
+  Serial.println("Turning lamp on"); // Debugging.
   lightDesired = lightFull;
   lampState = on;
 }
 
 void turnOff() {
-  // Serial.println("Turning lamp off"); // Debugging.
+  Serial.println("Turning lamp off"); // Debugging.
   lightDesired = lightOff;
   lampState = off;
+}
+
+void blinkOn() {
+  timingArray[blinkDelay] = millis();
+  timingArray[blinkTiming] = millis();
+  lightDesired = lightFull;
+  lampState = blink;
 }
 
 void lightFade() {
@@ -162,5 +183,27 @@ void lightFade() {
       }
     }
     analogWrite(ledPin, lightCurrent);
+  }
+}
+
+void blinkLight() {
+  long *flipTimer = &timingArray[blinkDelay];
+  long *blinkTimer = &timingArray[blinkTiming];
+  long curTime = millis();
+
+  // Flip from on to off or vice-versa if we've exceeded time in blinkToggle.
+  if (curTime - *flipTimer > blinkToggle) {
+    if (lightDesired == lightFull) {
+      Serial.println("Blinking off"); // Debugging
+      lightDesired == lightHalf;
+    } else {
+      Serial.println("Blinking on"); // Debugging
+      lightDesired == lightFull;
+    }
+    *flipTimer = curTime;
+  }
+  // If total blinking time has exceeded blinkTotal, then stay on.
+  if (curTime - *blinkTimer > blinkTotal) {
+    turnOn();
   }
 }
