@@ -60,7 +60,7 @@ int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 10; // How long to wait between each fade.
 
 // Blink variables
-const int blinkToggle = 3000; // How long to leave light on/off while blinking.
+const int blinkToggle = 1500; // How long to leave light on/off while blinking.
 const int blinkTotal = 30000; // How long to blink for before switching to On.
 
 void setup() {
@@ -72,7 +72,7 @@ void setup() {
     timingArray[i] = 0;
   }
 
-  Serial.begin(9600); // Debugging.
+  // Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
 }
 
@@ -113,7 +113,7 @@ void readSerial() {
       turnOff();
       break;
     case 'B':
-      Serial.println("BT blink mode"); // Debugging.
+      // Serial.println("BT blink mode"); // Debugging.
       blinkOn();
       break;
     default:
@@ -145,13 +145,13 @@ void debounceButton() {
 }
 
 void turnOn() {
-  Serial.println("Turning lamp on"); // Debugging.
+  // Serial.println("Turning lamp on"); // Debugging.
   lightDesired = lightFull;
   lampState = on;
 }
 
 void turnOff() {
-  Serial.println("Turning lamp off"); // Debugging.
+  // Serial.println("Turning lamp off"); // Debugging.
   lightDesired = lightOff;
   lampState = off;
 }
@@ -194,10 +194,10 @@ void blinkLight() {
   // Flip from on to off or vice-versa if we've exceeded time in blinkToggle.
   if (curTime - *flipTimer > blinkToggle) {
     if (lightDesired == lightFull) {
-      Serial.println("Blinking off"); // Debugging
+      // Serial.println("Blinking off"); // Debugging
       lightDesired = lightHalf;
     } else {
-      Serial.println("Blinking on"); // Debugging
+      // Serial.println("Blinking on"); // Debugging
       lightDesired = lightFull;
     }
     *flipTimer = curTime;
