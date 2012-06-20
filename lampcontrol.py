@@ -20,7 +20,7 @@ except:
     LAMP_ARGS = None
 
 # cheat and hard code this for now...
-BT_DEVICE_ADDR = "DB:B3:77:07:F9:2F" # The address of the device to send to.
+BT_DEVICE_ADDR = "00:06:66:46:5B:B2" # The address of the device to send to.
 
 droid = android.Android()
 
