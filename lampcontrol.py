@@ -9,6 +9,8 @@ Peter Hardy <peter@hardy.dropbear.id.au>
 import android
 import sys, time
 
+droid = android.Android()
+
 try:
     LAMP_CMD = droid.getIntent().result[u"extras"][u"%LAMP_CMD"]
 except:
