@@ -7,11 +7,13 @@ Peter Hardy <peter@hardy.dropbear.id.au>
 """
 
 import android
+import sys, time
 
 try:
     LAMP_CMD = droid.getIntent().result[u"extras"][u"%LAMP_CMD"]
 except:
     droid.makeToast("LAMP_CMD missing.")
+    sys.exit(1)
 try:
     LAMP_ARGS = droid.getIntent().result[u"extras"][u"%LAMP_ARGS"]
 except:
@@ -25,7 +27,8 @@ droid = android.Android()
 # First argument is the Bluetooth SPP UUID.
 BTconnect = droid.bluetoothConnect('00001101-0000-1000-8000-00805F9B34FB',
                                    BT_DEVICE_ADDR)
-if (BTconnect):
+if (BTconnect.error is None):
+    connID = BTconnect.id
     if LAMP_CMD is "on":
         sendStr = "A"
     elif LAMP_CMD is "off":
@@ -37,8 +40,12 @@ if (BTconnect):
         droid.makeToast("LAMP_CMD is invalid.")
 
     if (sendStr):
-        droid.bluetoothWrite(LAMP_CMD)
-    # Not sure if want.
-    # droid.bluetoothStop()
+        # A little bit of testing showed that waiting
+        # 0.3 seconds was just long enough to ensure
+        # the device had settled after connecting.
+        time.sleep(0.3)
+        droid.bluetoothWrite(sendStr)
+        droid.makeToast("Sent %s command." % LAMP_CMD)
+    droid.bluetoothStop()
 else:
     droid.makeToast("Unable to connect.")
