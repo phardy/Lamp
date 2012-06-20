@@ -195,10 +195,10 @@ void blinkLight() {
   if (curTime - *flipTimer > blinkToggle) {
     if (lightDesired == lightFull) {
       Serial.println("Blinking off"); // Debugging
-      lightDesired == lightHalf;
+      lightDesired = lightHalf;
     } else {
       Serial.println("Blinking on"); // Debugging
-      lightDesired == lightFull;
+      lightDesired = lightFull;
     }
     *flipTimer = curTime;
   }
