@@ -59,8 +59,7 @@ int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 10; // How long to wait between each fade.
 
 // Blink variables
-const int blinkToggle = 600; // How long to leave light on/off while blinking.
-const int blinkTotal = 30000; // How long to blink for before switching to On.
+const int blinkTime = 30000; // How long to blink for before switching to On.
 
 void setup() {
   pinMode(switchPin, INPUT);
@@ -156,7 +155,6 @@ void turnOff() {
 }
 
 void blinkOn() {
-  timingArray[blinkDelay] = millis();
   timingArray[blinkTiming] = millis();
   lightDesired = lightFull;
   lampState = blink;
@@ -201,7 +199,7 @@ void blinkLight() {
   }
 
   // If total blinking time has exceeded blinkTotal, then stay on.
-  if (curTime - *blinkTimer > blinkTotal) {
+  if (curTime - *blinkTimer > blinkTime) {
     turnOn();
   }
 }
