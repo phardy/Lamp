@@ -125,17 +125,17 @@ void readSerial() {
 void debounceButton() {
   long *timer = &timingArray[debounceTiming];
   int reading = digitalRead(switchPin);
-  long curtime = millis();
+  int curTime = millis();
   
   // If the switch has changed state
   // at all, reset the debounce timer.
   if (reading != prebounceButtonState) {
-    *timer = millis();
+    *timer = curTime;
   }
   
   // if the last debounce time was long enough
   // ago, then the current reading is stable.
-  if ((millis() - *timer) > debounceDelay) {
+  if ((curTime - *timer) > debounceDelay) {
     buttonState = reading;
   }
   
