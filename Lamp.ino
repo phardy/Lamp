@@ -115,7 +115,7 @@ void readButton() {
 
 void readSerial() {
   while ((Serial1.available() > 0) && (serialIndex < serialLength-1)) {
-    serialByte = Serial.read();
+    serialByte = Serial1.read();
     if (serialByte != ';') {
       serialString[serialIndex] = serialByte;
       serialIndex++;
@@ -178,6 +178,7 @@ void turnOff() {
 }
 
 void blinkOn(int time) {
+  // Serial.println("Turning lamp to blink"); // Debugging.
   if (time == 0) {
     blinkTime = 30000;
   } else {
