@@ -18,6 +18,7 @@
   
   Peter Hardy <peter@hardy.dropbear.id.au>
 */
+#include <string.h>
 
 // IO pins
 const int switchPin=4; // The pin the switch is attached to.
@@ -45,7 +46,13 @@ states lampState = off;
 // IO state
 int buttonState; // Current (debounced) button state.
 int lastButtonState = LOW; // Last (debounced) button state.
-int serialByte; // Bytes read from the bluetooth serial device.
+// Serial reading variables
+const int serialLength = 32; // The maximum length of a serial command.
+char serialByte; // An individual byte read from serial.
+char serialString[serialLength]; // A full serial command.
+byte serialIndex = 0; // The index of characters being inserted in inString.
+char *serialCmd;
+char *serialArgs;
 
 // Debounce variables
 int prebounceButtonState = LOW; // Tracks button state before debouncing.
@@ -59,7 +66,7 @@ int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 10; // How long to wait between each fade.
 
 // Blink variables
-const int blinkTime = 30000; // How long to blink for before switching to On.
+int blinkTime; // How long to blink for before switching to On.
 
 void setup() {
   pinMode(switchPin, INPUT);
@@ -99,26 +106,34 @@ void readButton() {
 }
 
 void readSerial() {
-  if (Serial1.available() > 0) {
-    serialByte = Serial1.read();
-    switch (serialByte) {
-    case 'A':
-      // Serial.println("BT turn on"); // Debugging.
-      turnOn();
-      break;
-    case 'a':
-      // Serial.println("BT turn off"); // Debugging.
-      turnOff();
-      break;
-    case 'B':
-      // Serial.println("BT blink mode"); // Debugging.
-      blinkOn();
-      break;
-    default:
-      Serial.print("BT unknown received: "); // Debugging.
-      Serial.println(serialByte);
-      break;
+  while ((Serial1.available() > 0) && (serialIndex < serialLength-1)) {
+    serialByte = Serial.read();
+    if (serialByte != ';') {
+      serialString[serialIndex] = serialByte;
+      serialIndex++;
     }
+    if (serialByte == ';' or serialIndex == (serialLength-1)) {
+      parseSerial();
+      serialIndex = 0;
+      memset(&serialString, 0, serialLength);
+    }
+  }
+}
+
+void parseSerial() {
+  char *s = serialString;
+  serialCmd = strtok_r(s, ", ", &s);
+  serialArgs = strtok_r(NULL, ", ", &s);
+
+  if (strcmp(serialCmd, "on") == 0) {
+    turnOn();
+  } else if (strcmp(serialCmd, "off") == 0) {
+    turnOff();
+  } else if (strcmp(serialCmd, "blink") == 0) {
+    int time = atoi(serialArgs);
+    blinkOn(time);
+  } else {
+    // Serial.println("Unable to parse BT command."); // Debugging.
   }
 }
 
@@ -154,7 +169,13 @@ void turnOff() {
   lampState = off;
 }
 
-void blinkOn() {
+void blinkOn(int time) {
+  if (time == 0) {
+    blinkTime = 30000;
+  } else {
+    // We receive a time in seconds, but need to store it in millis.
+    blinkTime = time * 1000;
+  }
   timingArray[blinkTiming] = millis();
   lightDesired = lightFull;
   lampState = blink;
