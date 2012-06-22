@@ -27,11 +27,10 @@ const int lightFull=255; // Maximum brightness.
 const int lightHalf=160; // Mid-range brightness. Tweak to taste.
 const int lightOff=0; // Minimum brightness (off).
 // The timing array holds counters used for timed events.
-const int timingSize=4; // Overall size of the array.
+const int timingSize=3; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
 const int fadeTiming=1; // Array element for fading ledPin.
-const int blinkDelay=2; // Array element for switching between on and off blinks.
-const int blinkTiming=3; // Array element to control how long to blink for.
+const int blinkTiming=2; // Array element to control how long to blink for.
 long timingArray[timingSize];
 
 // Current lamp state.
@@ -171,7 +170,8 @@ void lightFade() {
     if (lightDesired == lightCurrent) return;
     // Explicitly deal with the case where difference between desired and
     // current is less than the interval, rather than bouncing above and
-    // below desired. It's a little thing, but still.
+    // below desired.
+    // Required because blinking depends on exact values. Also I have OCD.
     int diff = lightDesired-lightCurrent;
     if (abs(diff) < fadeAmount) {
       lightCurrent = lightDesired;
@@ -187,21 +187,19 @@ void lightFade() {
 }
 
 void blinkLight() {
-  long *flipTimer = &timingArray[blinkDelay];
   long *blinkTimer = &timingArray[blinkTiming];
   long curTime = millis();
 
-  // Flip from on to off or vice-versa if we've exceeded time in blinkToggle.
-  if (curTime - *flipTimer > blinkToggle) {
-    if (lightDesired == lightFull) {
-      // Serial.println("Blinking off"); // Debugging
-      lightDesired = lightHalf;
-    } else {
-      // Serial.println("Blinking on"); // Debugging
-      lightDesired = lightFull;
-    }
-    *flipTimer = curTime;
+  // If the light has reached one end of the blink
+  // range, start changing to the other direction.
+  if (lightCurrent == lightFull) {
+    // Serial.println("Blinking off"); // Debugging
+    lightDesired = lightHalf;
+  } else if (lightCurrent == lightHalf) {
+    // Serial.println("Blinking on"); // Debugging
+    lightDesired = lightFull;
   }
+
   // If total blinking time has exceeded blinkTotal, then stay on.
   if (curTime - *blinkTimer > blinkTotal) {
     turnOn();
