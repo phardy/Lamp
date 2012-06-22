@@ -9,12 +9,20 @@
   * Momentary button attached to pin 4.
   * Bluetooth module: RX on pin 0, TX on pin 1. (This is mapped to
     Serial1 on Leonardo boards)
-  
+
+  Bluetooth protocol:
+  A valid bluetooth command is no more than 31 characters and looks like:
+  "command[, argument];"
+  Valid commands are:
+  "on": Turns the lamp on.
+  "off": Turns the lamp off.
+  "blink": The lamp blinks on and off, ending with turning on. Default
+           blink time is 30 seconds, unless overridden with an optional arg.
+
   References:
   LED driver: http://www.instructables.com/id/Circuits-for-using-High-Power-LED-s/
   Button wiring: http://www.arduino.cc/en/Tutorial/Button
   Compatible bluetooth module: http://www.sparkfun.com/products/10393
-  Compatible Android control app: https://play.google.com/store/apps/details?id=com.app.control
   
   Peter Hardy <peter@hardy.dropbear.id.au>
 */
