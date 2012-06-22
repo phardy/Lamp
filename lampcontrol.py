@@ -33,11 +33,11 @@ BTconnect = droid.bluetoothConnect('00001101-0000-1000-8000-00805F9B34FB',
 if (BTconnect.error is None):
     connID = BTconnect.id
     if LAMP_CMD == 1:
-        sendStr = "A"
+        sendStr = "on;"
     elif LAMP_CMD == 2:
-        sendStr = "a"
+        sendStr = "off;"
     elif LAMP_CMD == 3:
-        sendStr = "B"
+        sendStr = "blink, 30;"
     else:
         sendStr = None
         droid.makeToast("LAMP_CMD \"%s\" is invalid." % LAMP_CMD)
