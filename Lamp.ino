@@ -71,7 +71,7 @@ int lightDesired; // What we'd like to transition to.
 int lightCurrent; // What the light level currently is.
 const int normalFade = 5; // Default amount to fade per step.
 int fadeAmount = normalFade; // How much to fade per step.
-const int fadeStepTime = 10; // How long to wait between each fade.
+const int fadeStepTime = 15; // How long to wait between each fade.
 
 // Blink variables
 int blinkTime; // How long to blink for before switching to On.
