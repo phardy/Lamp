@@ -24,10 +24,19 @@
            blink time is 30 seconds, unless overridden with an optional arg.
 
   References:
+  LED: http://www.sparkfun.com/products/8718
   LED driver: http://www.instructables.com/id/Circuits-for-using-High-Power-LED-s/
   Button wiring: http://www.arduino.cc/en/Tutorial/Button
   Compatible bluetooth module: http://www.sparkfun.com/products/10393
-  
+
+  LED characteristics:
+  I've found that the minimum PWM values to make this LED light up are:
+  Red: 24, Green: 25, Blue: 50.
+  And naturally, they need to be considerably higher before the light is
+  visible through my diffuser. I've tried to come up with colours that
+  look reasonable with my LED, but they'll probably need to be tweaked
+  for significantly different LEDs.
+
   Peter Hardy <peter@hardy.dropbear.id.au>
 */
 #include <string.h>
@@ -92,11 +101,15 @@ const int fadeStepTime = 15; // How long to wait between each fade.
 int blinkTime; // How long to blink for before switching to On.
 
 // Predefined colours.
-int White[3]={255, 255, 255};
+int White[3]={255,255, 255};
 int Red[3]={255, 0, 0};
 int Green[3]={0, 255, 0};
 int Blue[3]={0, 0, 255};
 int Teal[3]={27, 224, 214};
+int Purple[3]={242, 85, 219};
+int Yellow[3]={247, 255, 18};
+int Orange[3]={255, 164, 18};
+int Pink[3]={235, 129, 177};
 int Black[3]={0, 0, 0}; // I hope nobody emails me about this.
 
 void setup() {
