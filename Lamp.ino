@@ -1,4 +1,4 @@
-﻿/*
+/*
   Control an LED lamp.
   Note that this is Leonardo-specific, but should work on other
   Arduino-compatible boards with a second serial (Serial1) connection
@@ -280,3 +280,4 @@ boolean cmpColour(int colourA[3], int colourB[3]) {
     }
   return true;
 }
+
