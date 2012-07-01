@@ -282,7 +282,7 @@ void setColour(int colour[]) {
 
 // Return true if the two colours passed in match.
 boolean cmpColour(int colourA[3], int colourB[3]) {
-  for int(i=0; i<3; i++) {
+  for (int i=0; i<3; i++) {
       if (colourA[i] != colourB[i]) {
 	return false;
       }
