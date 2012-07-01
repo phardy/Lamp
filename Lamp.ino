@@ -92,11 +92,11 @@ const int fadeStepTime = 15; // How long to wait between each fade.
 int blinkTime; // How long to blink for before switching to On.
 
 // Predefined colours.
-const int White[]={255, 255, 255};
-const int Red[]={255, 0, 0};
-const int Green[]={0, 255, 0};
-const int Blue[]={0, 0, 255};
-const int Black[]={0, 0, 0}; // I hope nobody emails me about this.
+int White[3]={255, 255, 255};
+int Red[3]={255, 0, 0};
+int Green[3]={0, 255, 0};
+int Blue[3]={0, 0, 255};
+int Black[3]={0, 0, 0}; // I hope nobody emails me about this.
 
 void setup() {
   pinMode(switchPin, INPUT);
@@ -198,13 +198,13 @@ void debounceButton() {
 
 void turnOn() {
   Serial.println("Turning lamp on"); // Debugging.
-  lightDesired = lightFull;
+  setColour(White);
   lampState = lampOn;
 }
 
 void turnOff() {
   Serial.println("Turning lamp off"); // Debugging.
-  lightDesired = lightOff;
+  setColour(Black);
   lampState = lampOff;
 }
 
@@ -217,7 +217,7 @@ void blinkOn(int time) {
     blinkTime = time * 1000;
   }
   timingArray[blinkTiming] = millis();
-  lightDesired = lightFull;
+  setColour(White);
   lampState = lampBlink;
 }
 
@@ -267,7 +267,7 @@ void blinkLight() {
 
 // Set the desired light levels to the colour represented by the
 // three-element array passed in.
-void setColour(int colour[3]) {
+void setColour(int colour[]) {
   for (int i=0; i<3; i++) {
     lightDesired[i] = colour[i];
   }
