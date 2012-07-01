@@ -22,6 +22,7 @@
   "off": Turns the lamp off.
   "blink": The lamp blinks on and off, ending with turning on. Default
            blink time is 30 seconds, unless overridden with an optional arg.
+  "cycle": The lamp will cycle through random colours.
 
   References:
   LED: http://www.sparkfun.com/products/8718
@@ -62,7 +63,7 @@ enum lampStates {
   lampOff, // The lamp is off.
   lampOn, // The lamp is on.
   lampBlink, // The lamp will blink on and off.
-  lampTimer // The lamp is on, but will turn off after a timed delay.
+  lampCycle // The lamp will cycle through random colours.
 };
 lampStates lampState = lampOff;
 
@@ -128,6 +129,7 @@ void setup() {
   }
   Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
+  randomSeed(analogRead(0));
 }
 
 void loop() {
@@ -135,6 +137,9 @@ void loop() {
   lightFade();  // Update light state.
   if (lampState == lampBlink) {
     blinkLight(); // Update blinking.
+  }
+  if (lampState == lampCycle) {
+    cycleLight(); // Update random colours.
   }
   readButton(); // Check for debounced button state changes.
   readSerial(); // Check for commands from bluetooth.
@@ -181,6 +186,8 @@ void parseSerial() {
   } else if (strcmp(serialCmd, "blink") == 0) {
     int time = atoi(serialArgs);
     blinkOn(time);
+  } else if (strcmp(serialCmd, "cycle") == 0) {
+    cycleOn();
   } else {
     // Serial.println("Unable to parse BT command."); // Debugging.
   }
@@ -235,6 +242,11 @@ void blinkOn(int time) {
   lampState = lampBlink;
 }
 
+void cycleOn() {
+  Serial.println("Turning lamp to cycle"); // Debugging.
+  lampState = lampCycle;
+}
+
 void lightFade() {
   long *timer = &timingArray[fadeTiming];
   long curTime = millis();
@@ -284,6 +296,14 @@ void blinkLight() {
   // If total blinking time has exceeded blinkTotal, then stay on.
   if (curTime - *blinkTimer > blinkTime) {
     turnOn();
+  }
+}
+
+void cycleLight() {
+  if (cmpColour(lightCurrent, lightDesired)) {
+    for (int i=0; i<3; i++) {
+      lightDesired[i] = random(256);
+    }
   }
 }
 
