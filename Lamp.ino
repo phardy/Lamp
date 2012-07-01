@@ -22,7 +22,7 @@
   "off": Turns the lamp off.
   "blink": The lamp blinks on and off, ending with turning on. Default
            blink time is 30 seconds, unless overridden with an optional arg.
-  "cycle": The lamp will cycle through random colours.
+  "mood": The lamp will cycle through random colours.
   "timer": Turn the lamp off after a given time. Default is five minutes,
            but can be overridden with an optional argument. If lamp is off,
 	   it's turned on, otherwise the current mode is used.
@@ -67,7 +67,7 @@ enum lampStates {
   lampOff, // The lamp is off.
   lampOn, // The lamp is on.
   lampBlink, // The lamp will blink on and off.
-  lampCycle // The lamp will cycle through random colours.
+  lampMood // The lamp will cycle through random colours.
 };
 lampStates lampState = lampOff;
 boolean timerActive = false;
@@ -104,9 +104,6 @@ int fadeAmount = normalFade; // How much to fade per step.
 const int normalStepTime = 15; // Default duration to wait between steps.
 int fadeStepTime = normalStepTime; // How long to wait between steps.
 
-// Blink variables
-int blinkTime; // How long to blink for before switching to On.
-
 // Predefined colours.
 int White[3]={255,255, 255};
 int Red[3]={255, 0, 0};
@@ -118,6 +115,10 @@ int Yellow[3]={247, 255, 18};
 int Orange[3]={255, 164, 18};
 int Pink[3]={235, 129, 177};
 int Black[3]={0, 0, 0}; // I hope nobody emails me about this.
+
+// Blink variables
+int blinkTime; // How long to blink for before switching to On.
+int blinkColour[3] = {255, 0, 0}; // Colour to blink to.
 
 void setup() {
   pinMode(switchPin, INPUT);
@@ -133,7 +134,7 @@ void setup() {
     lightDesired[i]=0;
     lightCurrent[i]=0;
   }
-  Serial.begin(9600); // Debugging.
+  // Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
   randomSeed(analogRead(0));
 }
@@ -144,8 +145,8 @@ void loop() {
   if (lampState == lampBlink) {
     blinkLight(); // Update blinking.
   }
-  if (lampState == lampCycle) {
-    cycleLight(); // Update random colours.
+  if (lampState == lampMood) {
+    moodLight(); // Update random colours.
   }
   if (timerActive) {
     checkTimer(); // Update off timer.
@@ -195,8 +196,8 @@ void parseSerial() {
   } else if (strcmp(serialCmd, "blink") == 0) {
     int time = atoi(serialArgs);
     blinkOn(time);
-  } else if (strcmp(serialCmd, "cycle") == 0) {
-    cycleOn();
+  } else if (strcmp(serialCmd, "mood") == 0) {
+    moodOn();
   } else if (strcmp(serialCmd, "timer") == 0) {
     int time = atoi(serialArgs);
     timerOn(time);
@@ -230,7 +231,7 @@ void debounceButton() {
 }
 
 void turnOn() {
-  Serial.println("Turning lamp on"); // Debugging.
+  // Serial.println("Turning lamp on"); // Debugging.
   fadeAmount = normalFade;
   fadeStepTime = normalStepTime;
   setColour(White);
@@ -238,13 +239,13 @@ void turnOn() {
 }
 
 void turnOff() {
-  Serial.println("Turning lamp off"); // Debugging.
+  // Serial.println("Turning lamp off"); // Debugging.
   setColour(Black);
   lampState = lampOff;
 }
 
 void blinkOn(int time) {
-  Serial.println("Turning lamp to blink"); // Debugging.
+  // Serial.println("Turning lamp to blink"); // Debugging.
   fadeAmount = normalFade;
   fadeStepTime = normalStepTime / 2;
   if (time == 0) {
@@ -254,15 +255,15 @@ void blinkOn(int time) {
     blinkTime = time * 1000;
   }
   timingArray[blinkTiming] = millis();
-  setColour(White);
+  setColour(blinkColour);
   lampState = lampBlink;
 }
 
-void cycleOn() {
-  Serial.println("Turning lamp to cycle"); // Debugging.
+void moodOn() {
+  // Serial.println("Turning lamp to mood."); // Debugging.
   fadeAmount = 1;
   fadeStepTime = 200;
-  lampState = lampCycle;
+  lampState = lampMood;
 }
 
 void timerOn(int time) {
@@ -313,12 +314,12 @@ void blinkLight() {
 
   // If the light has reached one end of the blink
   // range, start changing to the other direction.
-  if (cmpColour(lightCurrent, White)) {
+  if (cmpColour(lightCurrent, blinkColour)) {
     // Serial.println("Blinking off"); // Debugging
     setColour(Black);
   } else if (cmpColour(lightCurrent, Black)) {
     // Serial.println("Blinking on"); // Debugging
-    setColour(White);
+    setColour(blinkColour);
   }
 
   // If total blinking time has exceeded blinkTotal, then stay on.
@@ -327,7 +328,7 @@ void blinkLight() {
   }
 }
 
-void cycleLight() {
+void moodLight() {
   if (cmpColour(lightCurrent, lightDesired)) {
     for (int i=0; i<3; i++) {
       lightDesired[i] = random(256);
