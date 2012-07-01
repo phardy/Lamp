@@ -258,12 +258,12 @@ void blinkLight() {
 
   // If the light has reached one end of the blink
   // range, start changing to the other direction.
-  if (lightCurrent == lightFull) {
+  if (cmpColour(lightCurrent, White)) {
     // Serial.println("Blinking off"); // Debugging
-    lightDesired = lightHalf;
-  } else if (lightCurrent == lightHalf) {
+    setColour(Black);
+  } else if (cmpColour(lightCurrent, Black)) {
     // Serial.println("Blinking on"); // Debugging
-    lightDesired = lightFull;
+    setColour(White);
   }
 
   // If total blinking time has exceeded blinkTotal, then stay on.
