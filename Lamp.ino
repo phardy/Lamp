@@ -33,7 +33,7 @@
 #include <string.h>
 
 // IO pins
-const int switchPin=4; // The pin the switch is attached to.
+const int switchPin=2; // The pin the switch is attached to.
 const int rLedPin=9; // The pin the red LED is attached to.
 const int gLedPin=10; // The pin the green LED is attached to.
 const int bLedPin=11; // The pin the blue LED is attached to.
@@ -96,6 +96,7 @@ int White[3]={255, 255, 255};
 int Red[3]={255, 0, 0};
 int Green[3]={0, 255, 0};
 int Blue[3]={0, 0, 255};
+int Teal[3]={27, 224, 214};
 int Black[3]={0, 0, 0}; // I hope nobody emails me about this.
 
 void setup() {
@@ -229,19 +230,20 @@ void lightFade() {
     for (int i=0; i<3; i++) {
       int *lc = &lightCurrent[i];
       int *ld = &lightDesired[i];
-      if (*lc == *ld) break;
-      // Explicitly deal with the case where difference between desired and
-      // current is less than the interval, rather than bouncing above and
-      // below desired.
-      // Required because blinking depends on exact values. Also I have OCD.
-      int diff = *ld-*lc;
-      if (abs(diff) < fadeAmount) {
-	*ld=*lc;
-      } else {
-	if (*lc < *ld) {
-	  *lc = *lc + fadeAmount;
+      if (*lc != *ld) {
+	// Explicitly deal with the case where difference between desired and
+	// current is less than the interval, rather than bouncing above and
+	// below desired.
+	// Required because blinking depends on exact values. Also I have OCD.
+	int diff = *ld-*lc;
+	if (abs(diff) < fadeAmount) {
+	  *ld=*lc;
 	} else {
-	  *lc = *lc - fadeAmount;
+	  if (*lc < *ld) {
+	    *lc = *lc + fadeAmount;
+	  } else {
+	    *lc = *lc - fadeAmount;
+	  }
 	}
       }
     }
@@ -283,11 +285,9 @@ void setColour(int colour[]) {
 // Return true if the two colours passed in match.
 boolean cmpColour(int colourA[3], int colourB[3]) {
   for (int i=0; i<3; i++) {
-      if (colourA[i] != colourB[i]) {
-	return false;
-      }
+    if (colourA[i] != colourB[i]) {
+      return false;
     }
+  }
   return true;
 }
-
-
