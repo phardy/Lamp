@@ -226,22 +226,29 @@ void lightFade() {
   long curTime = millis();
   if (curTime - *timer > fadeStepTime) {
     *timer = curTime;
-    if (lightDesired == lightCurrent) return;
-    // Explicitly deal with the case where difference between desired and
-    // current is less than the interval, rather than bouncing above and
-    // below desired.
-    // Required because blinking depends on exact values. Also I have OCD.
-    int diff = lightDesired-lightCurrent;
-    if (abs(diff) < fadeAmount) {
-      lightCurrent = lightDesired;
-    } else {
-      if (lightCurrent < lightDesired) {
-        lightCurrent = lightCurrent + fadeAmount;
+    for (int i=0; i<3; i++) {
+      int *lc = &lightCurrent[i];
+      int *ld = &lightDesired[i];
+      if (*lc == *ld) break;
+      // Explicitly deal with the case where difference between desired and
+      // current is less than the interval, rather than bouncing above and
+      // below desired.
+      // Required because blinking depends on exact values. Also I have OCD.
+      int diff = *ld-*lc;
+      if (abs(diff) < fadeAmount) {
+	*ld=*lc;
       } else {
-        lightCurrent = lightCurrent - fadeAmount;
+	if (*lc < *ld) {
+	  *lc = *lc + fadeAmount;
+	} else {
+	  *lc = *lc - fadeAmount;
+	}
       }
     }
-    analogWrite(ledPin, lightCurrent);
+    // Write the updated values to the pins.
+    analogWrite(rLedPin, lightCurrent[rLightLevel]);
+    analogWrite(gLedPin, lightCurrent[gLightLevel]);
+    analogWrite(bLedPin, lightCurrent[bLightLevel]);
   }
 }
 
