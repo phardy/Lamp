@@ -37,7 +37,11 @@ if (BTconnect.error is None):
     elif LAMP_CMD == 2:
         sendStr = "off;"
     elif LAMP_CMD == 3:
-        sendStr = "blink, 30;"
+        sendStr = "blink, 15;"
+    elif LAMP_CMD == 4:
+        sendStr = "mood;"
+    elif LAMP_CMD == 5:
+        sendStr = "timer, 1800;"
     else:
         sendStr = None
         droid.makeToast("LAMP_CMD \"%s\" is invalid." % LAMP_CMD)
