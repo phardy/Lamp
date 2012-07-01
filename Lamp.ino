@@ -23,6 +23,9 @@
   "blink": The lamp blinks on and off, ending with turning on. Default
            blink time is 30 seconds, unless overridden with an optional arg.
   "cycle": The lamp will cycle through random colours.
+  "timer": Turn the lamp off after a given time. Default is five minutes,
+           but can be overridden with an optional argument. If lamp is off,
+	   it's turned on, otherwise the current mode is used.
 
   References:
   LED: http://www.sparkfun.com/products/8718
@@ -51,11 +54,12 @@ const int bLedPin=11; // The pin the blue LED is attached to.
 const int lightFull=255; // Maximum brightness.
 const int lightOff=0; // Minimum brightness (off).
 // The timing array holds counters used for timed events.
-const int timingSize=4; // Overall size of the array.
+const int timingSize=5; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
 const int longPressTiming=1; // Array element for timing a long button press.
 const int fadeTiming=2; // Array element for fading ledPin.
 const int blinkTiming=3; // Array element to control how long to blink for.
+const int timerTiming=4; // Array element to control the off timer.
 long timingArray[timingSize];
 
 // Current lamp state.
@@ -66,6 +70,7 @@ enum lampStates {
   lampCycle // The lamp will cycle through random colours.
 };
 lampStates lampState = lampOff;
+boolean timerActive = false;
 
 // Button state.
 enum buttonStates {
@@ -96,7 +101,8 @@ int lightDesired[3]; // What we'd like to transition to.
 int lightCurrent[3]; // What the light level currently is.
 const int normalFade = 5; // Default amount to fade per step.
 int fadeAmount = normalFade; // How much to fade per step.
-const int fadeStepTime = 15; // How long to wait between each fade.
+const int normalStepTime = 15; // Default duration to wait between steps.
+int fadeStepTime = normalStepTime; // How long to wait between steps.
 
 // Blink variables
 int blinkTime; // How long to blink for before switching to On.
@@ -140,6 +146,9 @@ void loop() {
   }
   if (lampState == lampCycle) {
     cycleLight(); // Update random colours.
+  }
+  if (timerActive) {
+    checkTimer(); // Update off timer.
   }
   readButton(); // Check for debounced button state changes.
   readSerial(); // Check for commands from bluetooth.
@@ -188,6 +197,9 @@ void parseSerial() {
     blinkOn(time);
   } else if (strcmp(serialCmd, "cycle") == 0) {
     cycleOn();
+  } else if (strcmp(serialCmd, "timer") == 0) {
+    int time = atoi(serialArgs);
+    timerOn(time);
   } else {
     // Serial.println("Unable to parse BT command."); // Debugging.
   }
@@ -219,6 +231,8 @@ void debounceButton() {
 
 void turnOn() {
   Serial.println("Turning lamp on"); // Debugging.
+  fadeAmount = normalFade;
+  fadeStepTime = normalStepTime;
   setColour(White);
   lampState = lampOn;
 }
@@ -231,6 +245,8 @@ void turnOff() {
 
 void blinkOn(int time) {
   Serial.println("Turning lamp to blink"); // Debugging.
+  fadeAmount = normalFade;
+  fadeStepTime = normalStepTime / 2;
   if (time == 0) {
     blinkTime = 30000;
   } else {
@@ -244,7 +260,19 @@ void blinkOn(int time) {
 
 void cycleOn() {
   Serial.println("Turning lamp to cycle"); // Debugging.
+  fadeAmount = 1;
+  fadeStepTime = 200;
   lampState = lampCycle;
+}
+
+void timerOn(int time) {
+  long *timer = &timingArray[timerTiming];
+  if (time == 0) {
+    *timer = millis() + 300000;
+  } else {
+    *timer = millis() + time*1000;
+  }
+  timerActive = true;
 }
 
 void lightFade() {
@@ -304,6 +332,15 @@ void cycleLight() {
     for (int i=0; i<3; i++) {
       lightDesired[i] = random(256);
     }
+  }
+}
+
+void checkTimer() {
+  long *timer = &timingArray[timerTiming];
+  long curTime = millis();
+  if (curTime > *timer) {
+    timerActive = false;
+    turnOff();
   }
 }
 
