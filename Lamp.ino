@@ -92,15 +92,17 @@ const int fadeStepTime = 15; // How long to wait between each fade.
 int blinkTime; // How long to blink for before switching to On.
 
 // Predefined colours.
-const int White[]=[255, 255, 255];
-const int Red[]=[255, 0, 0];
-const int Green[]=[0, 255, 0];
-const int Blue[]=[0, 0, 255];
-const int Black[]=[0, 0, 0]; // I hope nobody emails me about this.
+const int White[]={255, 255, 255};
+const int Red[]={255, 0, 0};
+const int Green[]={0, 255, 0};
+const int Blue[]={0, 0, 255};
+const int Black[]={0, 0, 0}; // I hope nobody emails me about this.
 
 void setup() {
   pinMode(switchPin, INPUT);
-  pinMode(ledPin, OUTPUT);
+  pinMode(rLedPin, OUTPUT);
+  pinMode(gLedPin, OUTPUT);
+  pinMode(bLedPin, OUTPUT);
   // Populate the timing array.
   for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
@@ -108,7 +110,7 @@ void setup() {
   // Populate the light level arrays.
   for (int i=0; i<3; i++) {
     lightDesired[i]=0;
-    lightCurent[i]=0;
+    lightCurrent[i]=0;
   }
   Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
@@ -280,4 +282,5 @@ boolean cmpColour(int colourA[3], int colourB[3]) {
     }
   return true;
 }
+
 
