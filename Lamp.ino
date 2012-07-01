@@ -1,11 +1,15 @@
-/*
+﻿/*
   Control an LED lamp.
   Note that this is Leonardo-specific, but should work on other
   Arduino-compatible boards with a second serial (Serial1) connection
   with minor modifications.
 
   Wiring:
-  * LED connected to pin 5. (I'm using a 1W LED driver; check references.)
+  * An RGB LED connected as:
+    Red to pin 9.
+    Green to pin 10.
+    Blue to pin 11.
+    I'm using a SparkFun high-power LED. Check references for driver circuit.
   * Momentary button attached to pin 4.
   * Bluetooth module: RX on pin 0, TX on pin 1. (This is mapped to
     Serial1 on Leonardo boards)
@@ -30,30 +34,38 @@
 
 // IO pins
 const int switchPin=4; // The pin the switch is attached to.
-const int ledPin=5; // The pin the LED is attached to.
+const int rLedPin=9; // The pin the red LED is attached to.
+const int gLedPin=10; // The pin the green LED is attached to.
+const int bLedPin=11; // The pin the blue LED is attached to.
 // Pre-defined light levels
 const int lightFull=255; // Maximum brightness.
-const int lightHalf=160; // Mid-range brightness. Tweak to taste.
 const int lightOff=0; // Minimum brightness (off).
 // The timing array holds counters used for timed events.
-const int timingSize=3; // Overall size of the array.
+const int timingSize=4; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
-const int fadeTiming=1; // Array element for fading ledPin.
-const int blinkTiming=2; // Array element to control how long to blink for.
+const int longPressTiming=1; // Array element for timing a long button press.
+const int fadeTiming=2; // Array element for fading ledPin.
+const int blinkTiming=3; // Array element to control how long to blink for.
 long timingArray[timingSize];
 
 // Current lamp state.
-enum states {
-  on, // The lamp is on.
-  off, // The lamp is off.
-  blink, // The lamp will blink on and off.
-  timer // The lamp is on, but will turn off after a timed delay.
+enum lampStates {
+  lampOff, // The lamp is off.
+  lampOn, // The lamp is on.
+  lampBlink, // The lamp will blink on and off.
+  lampTimer // The lamp is on, but will turn off after a timed delay.
 };
-states lampState = off;
+lampStates lampState = lampOff;
 
-// IO state
-int buttonState; // Current (debounced) button state.
-int lastButtonState = LOW; // Last (debounced) button state.
+// Button state.
+enum buttonStates {
+  buttonOff, // The button is off.
+  buttonOn, // The button is on (pressed).
+  buttonOnLong // The button is on and has been held down.
+};
+buttonStates curButtonState = buttonOff;
+buttonStates lastButtonState = buttonOff;
+
 // Serial reading variables
 const int serialLength = 32; // The maximum length of a serial command.
 char serialByte; // An individual byte read from serial.
@@ -67,8 +79,11 @@ int prebounceButtonState = LOW; // Tracks button state before debouncing.
 long debounceDelay = 50; // The debounce time. Input is stable after this.
 
 // Light fading variables
-int lightDesired; // What we'd like to transition to.
-int lightCurrent; // What the light level currently is.
+const int rLightLevel=0; // Array element for red LED light levels.
+const int gLightLevel=1; // Array element for green LED light levels.
+const int bLightLevel=2; // Array element for blue LED light levels.
+int lightDesired[3]; // What we'd like to transition to.
+int lightCurrent[3]; // What the light level currently is.
 const int normalFade = 5; // Default amount to fade per step.
 int fadeAmount = normalFade; // How much to fade per step.
 const int fadeStepTime = 15; // How long to wait between each fade.
@@ -76,23 +91,33 @@ const int fadeStepTime = 15; // How long to wait between each fade.
 // Blink variables
 int blinkTime; // How long to blink for before switching to On.
 
+// Predefined colours.
+const int White[]=[255, 255, 255];
+const int Red[]=[255, 0, 0];
+const int Green[]=[0, 255, 0];
+const int Blue[]=[0, 0, 255];
+const int Black[]=[0, 0, 0]; // I hope nobody emails me about this.
+
 void setup() {
   pinMode(switchPin, INPUT);
   pinMode(ledPin, OUTPUT);
-  buttonState = digitalRead(switchPin);
   // Populate the timing array.
   for (int i=0; i<timingSize; i++) {
     timingArray[i] = 0;
   }
-
-  // Serial.begin(9600); // Debugging.
+  // Populate the light level arrays.
+  for (int i=0; i<3; i++) {
+    lightDesired[i]=0;
+    lightCurent[i]=0;
+  }
+  Serial.begin(9600); // Debugging.
   Serial1.begin(115200); // Leonardo uses Serial1.
 }
 
 void loop() {
   debounceButton(); // Debounce button input.
   lightFade();  // Update light state.
-  if (lampState == blink) {
+  if (lampState == lampBlink) {
     blinkLight(); // Update blinking.
   }
   readButton(); // Check for debounced button state changes.
@@ -100,16 +125,16 @@ void loop() {
 }
 
 void readButton() {
-  if (buttonState != lastButtonState && buttonState == HIGH) {
-    if (lampState == off) {
+  if ((curButtonState != buttonOff) && (curButtonState != lastButtonState)) {
+    if (lampState == lampOff) {
       turnOn();
     } else {
       turnOff();
     }
   }
   // Reset lastButtonState if anything's changed.
-  if (buttonState != lastButtonState) {
-    lastButtonState = buttonState;
+  if (curButtonState != lastButtonState) {
+    lastButtonState = curButtonState;
   }
 }
 
@@ -159,26 +184,30 @@ void debounceButton() {
   // if the last debounce time was long enough
   // ago, then the current reading is stable.
   if ((curTime - *timer) > debounceDelay) {
-    buttonState = reading;
+    if (reading == HIGH) {
+      curButtonState = buttonOn;
+    } else {
+      curButtonState = buttonOff;
+    }
   }
   
   prebounceButtonState = reading;
 }
 
 void turnOn() {
-  // Serial.println("Turning lamp on"); // Debugging.
+  Serial.println("Turning lamp on"); // Debugging.
   lightDesired = lightFull;
-  lampState = on;
+  lampState = lampOn;
 }
 
 void turnOff() {
-  // Serial.println("Turning lamp off"); // Debugging.
+  Serial.println("Turning lamp off"); // Debugging.
   lightDesired = lightOff;
-  lampState = off;
+  lampState = lampOff;
 }
 
 void blinkOn(int time) {
-  // Serial.println("Turning lamp to blink"); // Debugging.
+  Serial.println("Turning lamp to blink"); // Debugging.
   if (time == 0) {
     blinkTime = 30000;
   } else {
@@ -187,7 +216,7 @@ void blinkOn(int time) {
   }
   timingArray[blinkTiming] = millis();
   lightDesired = lightFull;
-  lampState = blink;
+  lampState = lampBlink;
 }
 
 void lightFade() {
@@ -232,4 +261,22 @@ void blinkLight() {
   if (curTime - *blinkTimer > blinkTime) {
     turnOn();
   }
+}
+
+// Set the desired light levels to the colour represented by the
+// three-element array passed in.
+void setColour(int colour[3]) {
+  for (int i=0; i<3; i++) {
+    lightDesired[i] = colour[i];
+  }
+}
+
+// Return true if the two colours passed in match.
+boolean cmpColour(int colourA[3], int colourB[3]) {
+  for int(i=0; i<3; i++) {
+      if (colourA[i] != colourB[i]) {
+	return false;
+      }
+    }
+  return true;
 }
