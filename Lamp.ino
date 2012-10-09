@@ -50,9 +50,6 @@ const int switchPin=2; // The pin the switch is attached to.
 const int rLedPin=9; // The pin the red LED is attached to.
 const int gLedPin=10; // The pin the green LED is attached to.
 const int bLedPin=11; // The pin the blue LED is attached to.
-// Pre-defined light levels
-const int lightFull=255; // Maximum brightness.
-const int lightOff=0; // Minimum brightness (off).
 // The timing array holds counters used for timed events.
 const int timingSize=5; // Overall size of the array.
 const int debounceTiming=0; // Array element for debouncing switchPin input.
