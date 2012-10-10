@@ -62,6 +62,7 @@ long timingArray[timingSize];
 // Current lamp state.
 enum lampStates {
   lampOff, // The lamp is off.
+  lampDim, // The lamp is on, but dimmed.
   lampOn, // The lamp is on.
   lampBlink, // The lamp will blink on and off.
   lampMood // The lamp will cycle through random colours.
@@ -102,7 +103,8 @@ const int normalStepTime = 15; // Default duration to wait between steps.
 int fadeStepTime = normalStepTime; // How long to wait between steps.
 
 // Predefined colours.
-int White[3]={255,255, 255};
+int White[3]={255, 255, 255};
+int DimWhite[3]={127, 127, 127};
 int Red[3]={255, 0, 0};
 int Green[3]={0, 255, 0};
 int Blue[3]={0, 0, 255};
@@ -154,10 +156,14 @@ void loop() {
 
 void readButton() {
   if ((curButtonState != buttonOff) && (curButtonState != lastButtonState)) {
+    fadeAmount = normalFade;
+    fadeStepTime = normalStepTime;
     if (lampState == lampOff) {
-      turnOn();
+      // go to mid
+    } else if (lampState == lampDim) { 
+      // go to full
     } else {
-      turnOff();
+      // go to off
     }
   }
   // Reset lastButtonState if anything's changed.
