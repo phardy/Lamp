@@ -18,7 +18,8 @@
   A valid bluetooth command is no more than 31 characters and looks like:
   "command[, argument];"
   Valid commands are:
-  "on": Turns the lamp on.
+  "on": Turns the lamp on. Default is to turn on full white (0xFFFFFF),
+        but can be overridden by sending an optional colour in hex.
   "off": Turns the lamp off.
   "blink": The lamp blinks on and off, ending with turning on. Default
            blink time is 30 seconds, unless overridden with an optional arg.
@@ -159,11 +160,12 @@ void readButton() {
     fadeAmount = normalFade;
     fadeStepTime = normalStepTime;
     if (lampState == lampOff) {
-      // go to mid
+      turnOn(DimWhite);
+      lampState = lampDim;
     } else if (lampState == lampDim) { 
-      // go to full
+      turnOn(White);
     } else {
-      // go to off
+      turnOff();
     }
   }
   // Reset lastButtonState if anything's changed.
@@ -193,7 +195,13 @@ void parseSerial() {
   serialArgs = strtok_r(NULL, ", ", &s);
 
   if (strcmp(serialCmd, "on") == 0) {
-    turnOn();
+    if (strlen(serialArgs) > 0) {
+      int colour[3];
+      parseColour(colour, serialArgs);
+      turnOn(colour);
+    } else {
+      turnOn();
+    }
   } else if (strcmp(serialCmd, "off") == 0) {
     turnOff();
   } else if (strcmp(serialCmd, "blink") == 0) {
@@ -207,6 +215,15 @@ void parseSerial() {
   } else {
     // Serial.println("Unable to parse BT command."); // Debugging.
   }
+}
+
+void parseColour(int colour[], char *cstring) {
+  unsigned long cvalue = strtoul(cstring, NULL, 16);
+  // Stole this bit-shifting idea from google
+  // searches for converting hex triplets.
+  colour[0] = int((cvalue >> 16) & 0xFF);
+  colour[1] = int((cvalue >> 8) & 0xFF);
+  colour[2] = int(cvalue & 0xFF);
 }
 
 void debounceButton() {
@@ -234,10 +251,14 @@ void debounceButton() {
 }
 
 void turnOn() {
+  turnOn(White);
+}
+
+void turnOn(int colour[3]) {
   // Serial.println("Turning lamp on"); // Debugging.
   fadeAmount = normalFade;
   fadeStepTime = normalStepTime;
-  setColour(White);
+  setColour(colour);
   lampState = lampOn;
 }
 
