@@ -10,7 +10,7 @@
     Green to pin 10.
     Blue to pin 11.
     I'm using a SparkFun high-power LED. Check references for driver circuit.
-  * Momentary button attached to pin 4.
+  * Momentary button attached to pin 2.
   * Bluetooth module: RX on pin 0, TX on pin 1. (This is mapped to
     Serial1 on Leonardo boards)
 
