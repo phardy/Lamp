@@ -33,7 +33,25 @@ Valid commands are:
 ## LED characteristics
 
 I've found that the minimum PWM values to make this LED light up are `Red: 24, Green: 25, Blue: 50`. And naturally, they need to be considerably higher before the light is visible through my diffuser. I've tried to come up with colours that look reasonable with my LED, but they'll probably need to be tweaked for significantly different LEDs.
-  
+
+## Talking to the lamp from Android
+
+`py/lampcontrol.py` is a quick little python script intended as a helper to send commands to the lamp from [Tasker](http://tasker.dinglisch.net/). It requires [SL4A](http://code.google.com/p/android-scripting/) and the python interpreter.
+
+To use it, edit the script and set the `BT_DEVICE_ADDR` variable to the address of your bluetooth device. Use the "Run SL4A Script" action in Tasker, and set the `LAMP_CMD` variable. I wasn't able to send arbtrary strings, only integers seemed to work, so set `LAMP_CMD` to one of:
+
+* `1`: turns the lamp on.
+* `2`: turns the lamp off.
+* `3`: sets the lamp to blink for 15 seconds.
+* `4`: turns on the mood light mode.
+* `5`: sets the timer for 30 minutes.
+
+## Talking to the lamp from a PC
+
+Once you've paired with the bluetooth module, you should be able to open a serial connection to it with your favourite terminal emulator and issue text commands described in the Bluetooth Protocol section.
+
+`py/ColorSender.py` is a small GTK app that will send arbitrary RGB colours to the lamp, using [pyGTK](http://pygtk.org/) and [pySerial](http://pyserial.sourceforge.net/).
+
 ## References
 
 * LED: http://www.sparkfun.com/products/8718
