@@ -38,13 +38,9 @@ I've found that the minimum PWM values to make this LED light up are `Red: 24, G
 
 `py/lampcontrol.py` is a quick little python script intended as a helper to send commands to the lamp from [Tasker](http://tasker.dinglisch.net/). It requires [SL4A](http://code.google.com/p/android-scripting/) and the python interpreter.
 
-To use it, edit the script and set the `BT_DEVICE_ADDR` variable to the address of your bluetooth device. Use the "Run SL4A Script" action in Tasker, and set the `LAMP_CMD` variable. I wasn't able to send arbtrary strings, only integers seemed to work, so set `LAMP_CMD` to one of:
+To use it, edit the script and set the `BT_DEVICE_ADDR` variable to the address of your bluetooth device. Use the "Run SL4A Script" action in Tasker, and set the `lamp_cmd` variable. Valid commands are listed are identical to the bluetooth commands, minus the trailing semicolon.
 
-* `1`: turns the lamp on.
-* `2`: turns the lamp off.
-* `3`: sets the lamp to blink for 15 seconds.
-* `4`: turns on the mood light mode.
-* `5`: sets the timer for 30 minutes.
+For commands that accept an optional argument, the argument can be specified using the `lamp_args` variable.
 
 ## Talking to the lamp from a PC
 
