@@ -12,15 +12,15 @@ import sys, time
 droid = android.Android()
 
 try:
-    LAMP_CMD = int(droid.getIntent().result[u"extras"][u"%LAMP_CMD"])
+    lamp_cmd = int(droid.getIntent().result[u"extras"][u"%lamp_cmd"])
 except:
     # droid.makeToast("LAMP_CMD missing.")
     # sys.exit(1)
-    LAMP_CMD = 2
+    lamp_cmd = 2
 try:
-    LAMP_ARGS = droid.getIntent().result[u"extras"][u"%LAMP_ARGS"]
+    lamp_args = droid.getIntent().result[u"extras"][u"%lamp_args"]
 except:
-    LAMP_ARGS = None
+    lamp_args = None
 
 # cheat and hard code this for now...
 BT_DEVICE_ADDR = "00:06:66:46:5B:B2" # The address of the device to send to.
@@ -32,19 +32,19 @@ BTconnect = droid.bluetoothConnect('00001101-0000-1000-8000-00805F9B34FB',
                                    BT_DEVICE_ADDR)
 if (BTconnect.error is None):
     connID = BTconnect.id
-    if LAMP_CMD == 1:
+    if lamp_cmd == 1:
         sendStr = "on;"
-    elif LAMP_CMD == 2:
+    elif lamp_cmd == 2:
         sendStr = "off;"
-    elif LAMP_CMD == 3:
+    elif lamp_cmd == 3:
         sendStr = "blink, 15;"
-    elif LAMP_CMD == 4:
+    elif lamp_cmd == 4:
         sendStr = "mood;"
-    elif LAMP_CMD == 5:
+    elif lamp_cmd == 5:
         sendStr = "timer, 1800;"
     else:
         sendStr = None
-        droid.makeToast("LAMP_CMD \"%s\" is invalid." % LAMP_CMD)
+        droid.makeToast("lamp_cmd \"%s\" is invalid." % LAMP_CMD)
 
     if (sendStr):
         # A little bit of testing showed that waiting
@@ -52,7 +52,7 @@ if (BTconnect.error is None):
         # the device had settled after connecting.
         time.sleep(0.3)
         droid.bluetoothWrite(sendStr)
-        droid.makeToast("Sent \"%s\" command." % LAMP_CMD)
+        droid.makeToast("Sent \"%s\" command." % lamp_cmd)
     droid.bluetoothStop()
 else:
     print (BTconnect)
